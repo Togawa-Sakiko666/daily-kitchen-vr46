@@ -38,3 +38,16 @@ test('原有食材、收藏、自动保存数据可恢复',async()=>{
  const favorite=saveRecipe(plan.meals[0],15);let value;const storage={setItem:(k,v)=>{value=v;},getItem:()=>value};writeKitchen(storage,{inventory,settings,favorites:[favorite],result:plan});
  const restored=JSON.parse(value);assert.deepEqual(restoreIngredients(restored.inventory),inventory);assert.deepEqual(restoreFavorites(restored.favorites),[favorite]);assert.deepEqual(restored.result,plan);
 });
+test('先吃始终优先于随机轮换，单餐/换菜种子/早餐和快手限制',async()=>{
+ const {generateDayPlan,zero}=await import('../api/api-entry.js');
+ const base={healthy:false,weight:58,height:172,calorie:2100,spoon:15,cuisine:'轮换',sauces:['酱油','黑胡椒'],excluded:[],other:zero()};
+ const inventory=[{id:'chicken',priority:false},{id:'egg',priority:false},{id:'tofu',priority:true},{id:'broccoli',priority:false},{id:'onion',priority:false},{id:'mushroom',priority:true},{id:'rice',priority:false}];
+ for(let seed=0;seed<20;seed++)for(const slots of [['午饭'],['晚饭'],['午饭','晚饭']]){
+  const plan=generateDayPlan(inventory,{...base,seed},{slots,quick:false});
+  for(const meal of plan.meals){assert.equal(meal.items[0].id,'tofu',`seed ${seed} ${meal.label} must choose priority protein`);assert.ok(meal.items.some(i=>i.id==='mushroom'),`seed ${seed} ${meal.label} must include priority vegetable`);}
+ }
+ const excluded=generateDayPlan(inventory,{...base,seed:7,excluded:['tofu','mushroom']},{slots:['午饭'],quick:false});assert.ok(excluded.meals.every(m=>m.items.every(i=>!['tofu','mushroom'].includes(i.id))));assert.ok(excluded.gaps.some(g=>g.includes('排除设置优先')));
+ const quick=generateDayPlan([{id:'chicken',priority:true},{id:'egg',priority:false},{id:'rice',priority:false}],{...base,seed:2},{slots:['午饭'],quick:true});assert.ok(quick.gaps.some(g=>g.includes('关闭快手模式')));
+ const breakfast=generateDayPlan([{id:'chicken',priority:true},{id:'egg',priority:false},{id:'rice',priority:false}],{...base,seed:2},{slots:['早餐'],quick:false});assert.ok(breakfast.gaps.some(g=>g.includes('简单早餐')));
+ const multiple=generateDayPlan(inventory.map(i=>i.id==='chicken'?{...i,priority:true}:i),{...base,seed:1},{slots:['午饭','晚饭'],quick:false});assert.deepEqual(new Set(multiple.meals.map(m=>m.items[0].id)),new Set(['chicken','tofu']));
+});
