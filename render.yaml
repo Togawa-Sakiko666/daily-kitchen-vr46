@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: daily-kitchen-vr46
+    runtime: node
+    plan: free
+    buildCommand: npm run build && npm run typecheck && npm test
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LOGIN_USERNAME
+        sync: false
+      - key: LOGIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_ORIGIN
+        sync: false

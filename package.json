@@ -1,0 +1,14 @@
+{
+  "name": "daily-kitchen-cloud",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "build": "npm --prefix source ci && npm --prefix source run build",
+    "typecheck": "npm --prefix source run typecheck",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
