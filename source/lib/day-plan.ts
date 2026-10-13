@@ -61,5 +61,15 @@ export function generateDayPlan(inventory:Ingredient[],s:Settings,options:PlanOp
  const regular=selected.some(x=>x!=='早餐')&&!options.quick?generateFromIngredients(inventory,s).meals:[];
  const meals=selected.map((slot,index)=>slot==='早餐'||options.quick?simpleMeal(inventory,s,slot,s.seed+index):{...regular[slot==='午饭'?0:1],minutes:30,timeNote:'约 20–30 分钟，厚肉或复杂备料需延长'});
  const recorded=inventory.filter(i=>foodForItem(i)?.group==='record'&&!s.excluded.includes(i.id)).map(i=>({...i,grams:1}));
- return {meals,...summarizeMeals(meals,s,recorded)};
+ const summary=summarizeMeals(meals,s,recorded);
+ const used=new Set(meals.flatMap(m=>m.items.map(i=>i.id)));
+ const unused=inventory.filter(i=>i.priority&&!used.has(i.id));
+ for(const i of unused){
+  const name=foodForItem(i).name;
+  if(s.excluded.includes(i.id))summary.gaps.push(`先吃食材「${name}」未安排：已在“不吃的食材”中排除，排除设置优先。`);
+  else if(foodForItem(i).group==='record')summary.gaps.push(`先吃食材「${name}」未安排：需要先指定适用的做法类型。`);
+  else if((options.quick||selected.every(slot=>slot==='早餐'))&&!shortList.includes(baseId(i)))summary.gaps.push(`先吃食材「${name}」不适合当前简单早餐/15分钟快手模式；请选午饭或晚饭并关闭快手模式。`);
+  else summary.gaps.push(`先吃食材「${name}」本次未排入：同类优先食材较多或当前餐次搭配受限，可增加餐次或换个搭配。`);
+ }
+ return {meals,...summary};
 }

@@ -95,10 +95,12 @@ export function generate(inventory:Item[],s:Settings,availabilityOnly=false):{me
    const take=(i:Item,g:number)=>{const cap=cookingFood(i).maxPortion;const amount=Math.min(i.grams,g,cap?(s.healthy?cap:cap*1.6):Infinity);if(amount>0){items.push({...i,grams:amount});i.grams-=amount;}};
    const sort=(group:string)=>available.filter(i=>i.grams>0&&foodForItem(i).group===group).sort((a,b)=>Number(b.priority)-Number(a.priority)|| (s.healthy?Number(!!cookingFood(a).processed)-Number(!!cookingFood(b).processed):0)|| (s.healthy?foodForItem(b).protein-foodForItem(a).protein:0));
    const proteins=sort('protein');
-   if(proteins.length){const index=slot===0?0:(s.seed%proteins.length);const p=proteins[index];const desired=cookingId(p)==='egg'?150:cookingId(p)==='tofu'?250:cookingId(p)==='beans'?200:180;take(p,Math.min(desired,slot===0&&proteins.length===1?p.grams/2:p.grams));}
+   if(proteins.length){const priorityProteins=proteins.filter(p=>p.priority);const pool=priorityProteins.length?priorityProteins:proteins;const p=pool[(s.seed+slot)%pool.length];const desired=cookingId(p)==='egg'?150:cookingId(p)==='tofu'?250:cookingId(p)==='beans'?200:180;take(p,Math.min(desired,slot===0&&proteins.length===1?p.grams/2:p.grams));}
    if(s.healthy&&items.every(hasNutrition)&&nutrition(items).protein<28){const backup=sort('protein').find(p=>!items.some(i=>i.id===p.id));if(backup)take(backup,Math.min(cookingId(backup)==='egg'?100:150,slot===0?backup.grams/2:backup.grams));}
    const vegetables=sort('veg');
-   const candidates=vegetables.length?vegetables.slice((s.seed+slot)%vegetables.length).concat(vegetables.slice(0,(s.seed+slot)%vegetables.length)):[];
+   // Rotate within each tier: variety must never move a non-priority food ahead of a priority food.
+   const rotate=(group:Item[])=>{const offset=group.length?(s.seed+slot)%group.length:0;return group.slice(offset).concat(group.slice(0,offset));};
+   const candidates=[...rotate(vegetables.filter(v=>v.priority)),...rotate(vegetables.filter(v=>!v.priority))];
    let vegNeed=s.healthy?250:200;
    for(const v of candidates){if(vegNeed<=0)break;const portion=Math.min(vegNeed,cookingId(v)==='greenchili'?5:cookingId(v)==='negi'?30:cookingId(v)==='onion'?80:cookingId(v)==='chives'?50:150,slot===0?v.grams/2:v.grams);take(v,portion);vegNeed-=portion;}
    const carb=sort('carb')[0];if(carb)take(carb,Math.min(cookingId(carb)==='potato'||cookingId(carb)==='sweet'?250:200,slot===0?carb.grams/2:carb.grams));
