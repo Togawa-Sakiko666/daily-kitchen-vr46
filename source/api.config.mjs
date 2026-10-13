@@ -1,0 +1,1 @@
+import{defineConfig}from'vite';export default defineConfig({build:{ssr:'api-entry.ts',outDir:'../api',emptyOutDir:true,rollupOptions:{output:{entryFileNames:'api-entry.js'}}}});

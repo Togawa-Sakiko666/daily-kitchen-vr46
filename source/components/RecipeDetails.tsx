@@ -1,0 +1,4 @@
+import {type Meal,foodForItem} from '@/lib/kitchen';
+import StepText from './StepText';
+import {portionLabel} from '@/lib/day-plan';
+export default function RecipeDetails({meal:m,spoon}:{meal:Meal;spoon:number}){return <details className="recipe-details"><summary>用量、调味与制作步骤</summary><h4>建议用量 · 一人份</h4><div className="food-list">{m.items.map(i=><span key={i.id}>{foodForItem(i).name} <b>{portionLabel(i)}</b></span>)}</div><h4>调味 · 一勺 = {spoon} mL</h4><ul className="seasoning">{m.seasoning.map(x=><li key={x}>{x}</li>)}</ul>{!m.seasoning.length&&<p className="muted">不需要额外调味。</p>}<h4>制作步骤</h4><ol className="steps">{m.steps.map((x,i)=><li key={i}><span>{i+1}</span><StepText text={x}/></li>)}</ol><div className="nutrient-tags">{m.tags.map(x=><span key={x}>{x} 来源</span>)}</div>{m.notes.map(x=><p className="gentle-note" key={x}>{x}</p>)}</details>;}

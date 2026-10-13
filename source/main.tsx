@@ -1,0 +1,9 @@
+import React from 'react';import{createRoot}from'react-dom/client';import Page from './app/page';
+import './app/globals.css';
+import './app/motion.css';
+import './app/livery.css';
+import './app/refinement.css';
+import './app/pitlane.css';
+import './app/mobile.css';
+const originalFetch=window.fetch.bind(window);window.fetch=async(input,init)=>{const response=await originalFetch(input,init);if(response.status===401)window.location.replace('/login');return response;};
+createRoot(document.getElementById('root')!).render(<Page/>);
