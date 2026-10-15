@@ -4,3 +4,5 @@ export {writeKitchen} from './lib/local-save';
 export {saveRecipe,restoreFavorites} from './lib/recipe-library';
 export {generateDayPlan,defaultOptions} from './lib/day-plan';
 export {zero,restoreIngredients} from './lib/kitchen';
+
+export {mealIdentity,freshPlan,priorityReport,enrichMeals} from "./lib/experience";
