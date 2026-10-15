@@ -11,7 +11,7 @@ export function restoreFavorites(value:unknown):Favorite[]{
   if(v.meal===null)return [{id:String(v.id),title:v.title,meal:null,spoon:15}];
   const m=v.meal;
   if(!m||typeof m.title!=='string'||typeof m.label!=='string'||!Array.isArray(m.items)||!m.items.every((i:any)=>i&&Number.isFinite(i.grams)&&i.grams>0&&foodForItem(i))||!['steps','seasoning','tags','notes'].every(k=>Array.isArray(m[k])&&m[k].every((x:unknown)=>typeof x==='string'))||!m.nutrition||!['kcal','protein','fiber','salt'].every(k=>Number.isFinite(m.nutrition[k])))return [];
-  return [saveRecipe(m,[5,10,15].includes(v.spoon)?v.spoon:15)];
+  return [saveRecipe(m.aiState==='pending'?{...m,aiState:'failed',aiError:'上次请求已中断，请重试'}:m,[5,10,15].includes(v.spoon)?v.spoon:15)];
  });
 }
 export function missingIngredients(m:Meal,inventory:Ingredient[]){return m.items.filter(i=>!inventory.some(x=>x.id===i.id));}

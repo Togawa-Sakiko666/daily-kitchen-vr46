@@ -44,7 +44,7 @@ export function filterFoods(query:string,category='全部'){const q=normalizeFoo
 
 export type Item = {id:string; grams:number; priority:boolean; custom?:Food; enteredAmount?:string};
 export type Ingredient = Omit<Item,'grams'|'enteredAmount'>;
-export type Meal = {label:string; title:string; items:Item[]; seasoning:string[]; steps:string[]; nutrition:Nutrients; nutritionComplete:boolean; tags:string[]; notes:string[]; minutes?:number; timeNote?:string};
+export type Meal = {aiState?:"pending"|"done"|"failed"; aiError?:string; aiModel?:string; aiResponseId?:string;label:string; title:string; items:Item[]; seasoning:string[]; steps:string[]; nutrition:Nutrients; nutritionComplete:boolean; tags:string[]; notes:string[]; minutes?:number; timeNote?:string};
 export type Settings = {healthy:boolean; weight:number; height:number; calorie:number; spoon:number; cuisine:string; sauces:string[]; excluded:string[]; other:Nutrients; seed:number};
 export const zero=():Nutrients=>({kcal:0,protein:0,fiber:0,salt:0});
 export const add=(a:Nutrients,b:Nutrients):Nutrients=>({kcal:a.kcal+b.kcal,protein:a.protein+b.protein,fiber:a.fiber+b.fiber,salt:a.salt+b.salt});
